@@ -4,8 +4,10 @@ import { FilterState, Restaurant } from '../types';
 import RestaurantCard from '../components/RestaurantCard';
 import FilterSidebar from '../components/FilterSidebar';
 import Navbar from '../components/Navbar';
+import { useLanguage } from '../context/LanguageContext';
 
 const Home: React.FC = () => {
+  const { lang } = useLanguage();
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
     location: 'All Locations',
@@ -39,7 +41,7 @@ const Home: React.FC = () => {
     // Location filter
     if (filters.location && filters.location !== 'All Locations') {
       filtered = filtered.filter((restaurant) =>
-        restaurant.location.includes(filters.location.replace(',', ''))
+        restaurant.location.includes(filters.location)
       );
     }
 
@@ -193,7 +195,11 @@ const Home: React.FC = () => {
             <div className="mb-4 sm:mb-6 flex items-center justify-between">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
-                  {filteredRestaurants.length} Restaurant{filteredRestaurants.length !== 1 ? 's' : ''} Found
+                  {lang === 'ar'
+                    ? `تم العثور على ${filteredRestaurants.length} مطعم`
+                    : `${filteredRestaurants.length} Restaurant${
+                        filteredRestaurants.length !== 1 ? 's' : ''
+                      } Found`}
                 </h1>
                 {(filters.searchQuery ||
                   filters.location !== 'All Locations' ||
@@ -206,7 +212,9 @@ const Home: React.FC = () => {
                   filters.suggested.length > 0 ||
                   filters.dietaryRestrictions.length > 0) && (
                   <p className="text-xs sm:text-sm text-gray-600">
-                    Showing results based on your filters
+                    {lang === 'ar'
+                      ? 'يتم عرض النتائج بناءً على عوامل التصفية الخاصة بك'
+                      : 'Showing results based on your filters'}
                   </p>
                 )}
               </div>
@@ -237,9 +245,13 @@ const Home: React.FC = () => {
                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No restaurants found</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">
+                  {lang === 'ar' ? 'لم يتم العثور على مطاعم' : 'No restaurants found'}
+                </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Try adjusting your filters or search query.
+                  {lang === 'ar'
+                    ? 'حاول تعديل عوامل التصفية أو كلمات البحث.'
+                    : 'Try adjusting your filters or search query.'}
                 </p>
               </div>
             ) : (

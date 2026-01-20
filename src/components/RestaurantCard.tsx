@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Restaurant } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
+  const { lang } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Use images array if available, otherwise fallback to single image
@@ -141,7 +143,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
           <div className="flex-1">
             <div className="flex items-start justify-between mb-2 flex-wrap gap-2">
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 hover:text-orange-600 cursor-pointer transition-colors">
-                {restaurant.name}
+                {lang === 'ar' && restaurant.nameAr ? restaurant.nameAr : restaurant.name}
               </h3>
               <span className="text-base sm:text-lg font-semibold text-gray-600">{restaurant.priceRange}</span>
             </div>
@@ -151,7 +153,9 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="truncate">{restaurant.location}</span>
+              <span className="truncate">
+                {lang === 'ar' && restaurant.locationAr ? restaurant.locationAr : restaurant.location}
+              </span>
             </div>
 
             <div className="flex items-center mb-3 flex-wrap gap-2">
@@ -164,11 +168,18 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
               </span>
             </div>
 
-            <p className="text-gray-600 text-xs sm:text-sm mb-4 overflow-hidden" style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}>{restaurant.description}</p>
+            <p
+              className="text-gray-600 text-xs sm:text-sm mb-4 overflow-hidden"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {lang === 'ar' && restaurant.descriptionAr
+                ? restaurant.descriptionAr
+                : restaurant.description}
+            </p>
 
             {/* Category Badges */}
             <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">

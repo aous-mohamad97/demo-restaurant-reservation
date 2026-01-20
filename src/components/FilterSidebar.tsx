@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FilterState } from '../types';
 import { categories, cuisines } from '../data/restaurants';
+import { useLanguage } from '../context/LanguageContext';
 
 interface FilterSidebarProps {
   filters: FilterState;
@@ -8,6 +9,7 @@ interface FilterSidebarProps {
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }) => {
+  const { lang } = useLanguage();
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     sort: true,
     price: true,
@@ -143,7 +145,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
     <div className="w-72 bg-white border-r border-gray-200 h-[calc(100vh-4rem)] overflow-y-auto sticky top-16 lg:sticky lg:top-16">
       <div className="p-3 sm:p-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Filters</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            {lang === 'ar' ? 'عوامل التصفية' : 'Filters'}
+          </h2>
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
@@ -160,7 +164,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('sort')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Sort By</span>
+            <span>{lang === 'ar' ? 'ترتيب حسب' : 'Sort By'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.sort ? 'rotate-180' : ''}`}
               fill="none"
@@ -173,10 +177,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           {expandedSections.sort && (
             <div className="space-y-2">
               {[
-                { value: 'rating', label: 'Highest Rated' },
-                { value: 'reviews', label: 'Most Reviews' },
-                { value: 'name', label: 'Name (A-Z)' },
-                { value: 'deliveryTime', label: 'Fastest Delivery' },
+                { value: 'rating', label: lang === 'ar' ? 'أعلى تقييم' : 'Highest Rated' },
+                { value: 'reviews', label: lang === 'ar' ? 'أكثر المراجعات' : 'Most Reviews' },
+                { value: 'name', label: lang === 'ar' ? 'الاسم (أ-ي)' : 'Name (A-Z)' },
+                { value: 'deliveryTime', label: lang === 'ar' ? 'أسرع توصيل' : 'Fastest Delivery' },
               ].map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
@@ -196,7 +200,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
 
         {/* Price Range - Segmented Buttons */}
         <div className="mb-6 border-b border-gray-200 pb-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Price</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">
+            {lang === 'ar' ? 'السعر' : 'Price'}
+          </h3>
           {expandedSections.price && (
             <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
               {['$', '$$', '$$$', '$$$$'].map((price, index) => (
@@ -222,7 +228,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('suggested')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Suggested</span>
+            <span>{lang === 'ar' ? 'مقترَح' : 'Suggested'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.suggested ? 'rotate-180' : ''}`}
               fill="none"
@@ -235,12 +241,30 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           {expandedSections.suggested && (
             <div className="space-y-2">
               {[
-                { value: 'openNow', label: `Open now ${getCurrentTime()}` },
-                { value: 'offersDelivery', label: 'Offers delivery' },
-                { value: 'takeawayAvailable', label: 'Takeaway available' },
-                { value: 'suitableForDinner', label: 'Suitable for dinner' },
-                { value: 'newAndTrendy', label: 'New and trendy' },
-                { value: 'terrace', label: 'Terrace' },
+                {
+                  value: 'openNow',
+                  label:
+                    lang === 'ar'
+                      ? `مفتوح الآن ${getCurrentTime()}`
+                      : `Open now ${getCurrentTime()}`,
+                },
+                {
+                  value: 'offersDelivery',
+                  label: lang === 'ar' ? 'يوفر خدمة التوصيل' : 'Offers delivery',
+                },
+                {
+                  value: 'takeawayAvailable',
+                  label: lang === 'ar' ? 'متاح سفري' : 'Takeaway available',
+                },
+                {
+                  value: 'suitableForDinner',
+                  label: lang === 'ar' ? 'مناسب للعشاء' : 'Suitable for dinner',
+                },
+                {
+                  value: 'newAndTrendy',
+                  label: lang === 'ar' ? 'جديد وعصري' : 'New and trendy',
+                },
+                { value: 'terrace', label: lang === 'ar' ? 'تراس' : 'Terrace' },
               ].map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
@@ -262,7 +286,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('features')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Features</span>
+            <span>{lang === 'ar' ? 'المميزات' : 'Features'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.features ? 'rotate-180' : ''}`}
               fill="none"
@@ -275,12 +299,30 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           {expandedSections.features && (
             <div className="space-y-2">
               {[
-                { value: 'suitableForLunch', label: 'Suitable for lunch' },
-                { value: 'suitableForChildren', label: 'Suitable for children' },
-                { value: 'suitableForGroups', label: 'Suitable for groups' },
-                { value: 'dogsAllowed', label: 'Dogs allowed' },
-                { value: 'fullBar', label: 'Full bar' },
-                { value: 'suitableForBrunch', label: 'Suitable for brunch' },
+                {
+                  value: 'suitableForLunch',
+                  label: lang === 'ar' ? 'مناسب للغداء' : 'Suitable for lunch',
+                },
+                {
+                  value: 'suitableForChildren',
+                  label: lang === 'ar' ? 'مناسب للأطفال' : 'Suitable for children',
+                },
+                {
+                  value: 'suitableForGroups',
+                  label: lang === 'ar' ? 'مناسب للمجموعات' : 'Suitable for groups',
+                },
+                {
+                  value: 'dogsAllowed',
+                  label: lang === 'ar' ? 'يسمح بدخول الكلاب' : 'Dogs allowed',
+                },
+                {
+                  value: 'fullBar',
+                  label: lang === 'ar' ? 'بار كامل' : 'Full bar',
+                },
+                {
+                  value: 'suitableForBrunch',
+                  label: lang === 'ar' ? 'مناسب للبرانش' : 'Suitable for brunch',
+                },
               ].map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
@@ -293,7 +335,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
                 </label>
               ))}
               <button className="text-sm text-blue-600 hover:text-blue-700 mt-2">
-                View all
+                {lang === 'ar' ? 'عرض الكل' : 'View all'}
               </button>
             </div>
           )}
@@ -301,14 +343,19 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
 
         {/* Dietary Restrictions - Pill Buttons */}
         <div className="mb-6 border-b border-gray-200 pb-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Dietary Restrictions</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">
+            {lang === 'ar' ? 'القيود الغذائية' : 'Dietary Restrictions'}
+          </h3>
           {expandedSections.dietary && (
             <div className="flex flex-wrap gap-2">
               {[
-                { value: 'halal', label: 'Halal' },
-                { value: 'vegan', label: 'Vegan' },
-                { value: 'vegetarian', label: 'Vegetarian' },
-                { value: 'kosher', label: 'Kosher' },
+                { value: 'halal', label: lang === 'ar' ? 'حلال' : 'Halal' },
+                { value: 'vegan', label: lang === 'ar' ? 'نباتي' : 'Vegan' },
+                {
+                  value: 'vegetarian',
+                  label: lang === 'ar' ? 'نباتي (ألبان)' : 'Vegetarian',
+                },
+                { value: 'kosher', label: lang === 'ar' ? 'كوشير' : 'Kosher' },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -332,7 +379,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('distance')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Distance</span>
+            <span>{lang === 'ar' ? 'المسافة' : 'Distance'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.distance ? 'rotate-180' : ''}`}
               fill="none"
@@ -345,11 +392,26 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           {expandedSections.distance && (
             <div className="space-y-2">
               {[
-                { value: 'asTheCrowFlies', label: 'As the crow flies' },
-                { value: 'byCar', label: 'By car (8 km)' },
-                { value: 'byBike', label: 'By bike (4 km)' },
-                { value: 'onFoot', label: 'On foot (2 km)' },
-                { value: 'within500m', label: 'Within 500 m' },
+                {
+                  value: 'asTheCrowFlies',
+                  label: lang === 'ar' ? 'خط مستقيم' : 'As the crow flies',
+                },
+                {
+                  value: 'byCar',
+                  label: lang === 'ar' ? 'بالسيارة (٨ كم)' : 'By car (8 km)',
+                },
+                {
+                  value: 'byBike',
+                  label: lang === 'ar' ? 'بالدراجة (٤ كم)' : 'By bike (4 km)',
+                },
+                {
+                  value: 'onFoot',
+                  label: lang === 'ar' ? 'مشياً (٢ كم)' : 'On foot (2 km)',
+                },
+                {
+                  value: 'within500m',
+                  label: lang === 'ar' ? 'ضمن ٥٠٠ متر' : 'Within 500 m',
+                },
               ].map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
@@ -372,7 +434,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('rating')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Minimum Rating</span>
+            <span>{lang === 'ar' ? 'أدنى تقييم' : 'Minimum Rating'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.rating ? 'rotate-180' : ''}`}
               fill="none"
@@ -397,8 +459,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
                     {rating > 0 ? (
                       <>
                         {rating}+ ⭐
-                        <span className="ml-1 text-gray-500">({rating} stars & up)</span>
+                        <span className="ml-1 text-gray-500">
+                          {lang === 'ar'
+                            ? `(${rating} نجوم فأكثر)`
+                            : `(${rating} stars & up)`}
+                        </span>
                       </>
+                    ) : lang === 'ar' ? (
+                      'أي تقييم'
                     ) : (
                       'Any Rating'
                     )}
@@ -415,7 +483,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('cuisine')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Cuisine Type</span>
+            <span>{lang === 'ar' ? 'نوع المطبخ' : 'Cuisine Type'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.cuisine ? 'rotate-180' : ''}`}
               fill="none"
@@ -448,7 +516,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('category')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>Category</span>
+            <span>{lang === 'ar' ? 'التصنيف' : 'Category'}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.category ? 'rotate-180' : ''}`}
               fill="none"

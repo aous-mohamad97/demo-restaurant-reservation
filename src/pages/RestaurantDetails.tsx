@@ -1,6 +1,34 @@
 import React, { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { restaurants } from "../data/restaurants";
+import { useLanguage } from "../context/LanguageContext";
+
+type SampleReview = {
+  id: string;
+  userName: string;
+  userLocation: string;
+  badge?: string;
+  reviewsCount: number;
+  rating: number;
+  date: string;
+  text: string;
+};
+
+const sampleReviews: SampleReview[] = [
+  {
+    id: "1",
+    userName: "Gregg Y.",
+    userLocation: "Fairfield, United States",
+    badge: "Elite 26",
+    reviewsCount: 6,
+    rating: 5,
+    date: "Dec 1, 2025",
+    text:
+      "Comptoir de la Gastronomie is indulgence distilled into three dishes: roasted bone marrow with sea salt, pan-seared duck foie gras, and roasted duck breast. Each plate is unapologetically rich and perfectly executed. " +
+      "Bone marrow and pan-seared foie gras are experiences that leave you speechless, and the duck breast is cooked to perfection and paired beautifully with potatoes.\n\n" +
+      "A true embodiment of dining hedonism and an experience that reminds you why Paris still owns the word gastronomy.",
+  },
+];
 
 const formatPriceRange = (priceRange: string) => priceRange || "$$";
 const defaultOpeningHours: Array<{
@@ -22,6 +50,14 @@ const RestaurantDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const restaurant = useMemo(() => restaurants.find((r) => r.id === id), [id]);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [reviewSort, setReviewSort] = useState<
+    "recent" | "rating_desc" | "rating_asc"
+  >("recent");
+  const [reviewRatingFilter, setReviewRatingFilter] = useState<number | null>(
+    null
+  );
+  const [reviewSearch, setReviewSearch] = useState("");
+  const { lang } = useLanguage();
 
   if (!restaurant) {
     return (
@@ -120,32 +156,40 @@ const RestaurantDetails: React.FC = () => {
     },
   ].filter((a) => a.enabled);
 
-  type SampleReview = {
-    id: string;
-    userName: string;
-    userLocation: string;
-    badge?: string;
-    reviewsCount: number;
-    rating: number;
-    date: string;
-    text: string;
-  };
+  const filteredReviews = useMemo(() => {
+    let list = [...sampleReviews];
 
-  const sampleReviews: SampleReview[] = [
-    {
-      id: "1",
-      userName: "Gregg Y.",
-      userLocation: "Fairfield, United States",
-      badge: "Elite 26",
-      reviewsCount: 6,
-      rating: 5,
-      date: "Dec 1, 2025",
-      text:
-        "Comptoir de la Gastronomie is indulgence distilled into three dishes: roasted bone marrow with sea salt, pan-seared duck foie gras, and roasted duck breast. Each plate is unapologetically rich and perfectly executed. " +
-        "Bone marrow and pan-seared foie gras are experiences that leave you speechless, and the duck breast is cooked to perfection and paired beautifully with potatoes.\n\n" +
-        "A true embodiment of dining hedonism and an experience that reminds you why Paris still owns the word gastronomy.",
-    },
-  ];
+    // Rating filter
+    if (reviewRatingFilter !== null) {
+      list = list.filter((r) => r.rating === reviewRatingFilter);
+    }
+
+    // Text search (user name + review text)
+    if (reviewSearch.trim()) {
+      const q = reviewSearch.toLowerCase();
+      list = list.filter(
+        (r) =>
+          r.userName.toLowerCase().includes(q) ||
+          r.text.toLowerCase().includes(q)
+      );
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      switch (reviewSort) {
+        case "rating_desc":
+          return b.rating - a.rating;
+        case "rating_asc":
+          return a.rating - b.rating;
+        case "recent":
+        default:
+          // With dummy data, fall back to id order as recency proxy
+          return b.id.localeCompare(a.id);
+      }
+    });
+
+    return list;
+  }, [reviewRatingFilter, reviewSearch, reviewSort]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -153,7 +197,7 @@ const RestaurantDetails: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {restaurant.name}
+              {lang === "ar" && restaurant.nameAr ? restaurant.nameAr : restaurant.name}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600">
               <span className="flex items-center font-semibold text-gray-900">
@@ -590,7 +634,7 @@ const RestaurantDetails: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-500">
-              Delivery time
+              {lang === "ar" ? "زمن التوصيل" : "Delivery time"}
             </div>
             <div className="text-base sm:text-lg font-semibold text-gray-900">
               {restaurant.deliveryTime}
@@ -613,18 +657,24 @@ const RestaurantDetails: React.FC = () => {
             </div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-4">
-            <div className="text-xs sm:text-sm text-gray-500">Price range</div>
+            <div className="text-xs sm:text-sm text-gray-500">
+              {lang === "ar" ? "متوسط السعر" : "Price range"}
+            </div>
             <div className="text-base sm:text-lg font-semibold text-gray-900">
               {formatPriceRange(restaurant.priceRange)}
             </div>
             <div className="mt-2 text-xs sm:text-sm text-gray-500">
-              Cuisine: {restaurant.cuisine}
+              {lang === "ar" ? `نوع المطبخ: ${restaurant.cuisine}` : `Cuisine: ${restaurant.cuisine}`}
             </div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
-            <div className="text-xs sm:text-sm text-gray-500">Location</div>
+            <div className="text-xs sm:text-sm text-gray-500">
+              {lang === "ar" ? "الموقع" : "Location"}
+            </div>
             <div className="text-base sm:text-lg font-semibold text-gray-900 break-words">
-              {restaurant.location}
+              {lang === "ar" && restaurant.locationAr
+                ? restaurant.locationAr
+                : restaurant.location}
             </div>
             <a
               href={mapLink}
@@ -905,28 +955,45 @@ const RestaurantDetails: React.FC = () => {
             {/* Filters & search */}
             <div className="lg:col-span-2 space-y-3">
               <div className="flex flex-wrap gap-2">
-                <select className="px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm bg-white text-gray-700">
-                  <option>Sort by: Most recent</option>
-                  <option>Sort by: Highest rating</option>
-                  <option>Sort by: Lowest rating</option>
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm bg-white text-gray-700"
+                  value={reviewSort}
+                  onChange={(e) =>
+                    setReviewSort(
+                      e.target.value as "recent" | "rating_desc" | "rating_asc"
+                    )
+                  }
+                >
+                  <option value="recent">Sort by: Most recent</option>
+                  <option value="rating_desc">Sort by: Highest rating</option>
+                  <option value="rating_asc">Sort by: Lowest rating</option>
                 </select>
                 <select className="px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm bg-white text-gray-700">
                   <option>Language: English</option>
                   <option>Language: Any</option>
                 </select>
-                <select className="px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm bg-white text-gray-700">
-                  <option>Filter by rating</option>
-                  <option>5 stars</option>
-                  <option>4 stars</option>
-                  <option>3 stars</option>
-                  <option>2 stars</option>
-                  <option>1 star</option>
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm bg-white text-gray-700"
+                  value={reviewRatingFilter ?? "all"}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setReviewRatingFilter(value === "all" ? null : Number(value));
+                  }}
+                >
+                  <option value="all">Filter by rating</option>
+                  <option value="5">5 stars</option>
+                  <option value="4">4 stars</option>
+                  <option value="3">3 stars</option>
+                  <option value="2">2 stars</option>
+                  <option value="1">1 star</option>
                 </select>
               </div>
               <div className="relative max-w-md">
                 <input
                   type="text"
                   placeholder="Search within reviews"
+                  value={reviewSearch}
+                  onChange={(e) => setReviewSearch(e.target.value)}
                   className="w-full px-4 py-2 pl-10 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
                 <svg
@@ -948,7 +1015,7 @@ const RestaurantDetails: React.FC = () => {
 
           {/* Sample review cards */}
           <div className="mt-6 space-y-6">
-            {sampleReviews.map((review) => {
+            {filteredReviews.map((review) => {
               const reviewPhotos = images.slice(0, 4);
               return (
                 <div
