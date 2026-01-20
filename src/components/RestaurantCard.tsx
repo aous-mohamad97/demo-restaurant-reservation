@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Restaurant } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import ReservationDialog from './ReservationDialog';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -9,6 +10,7 @@ interface RestaurantCardProps {
 
 const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   const { lang } = useLanguage();
+  const [showReservation, setShowReservation] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Use images array if available, otherwise fallback to single image
@@ -67,11 +69,12 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
   };
 
   return (
-    <Link
-      to={`/restaurants/${restaurant.id}`}
-      className="block bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
-    >
-      <div className="flex flex-col sm:flex-row items-stretch">
+    <>
+      <Link
+        to={`/restaurants/${restaurant.id}`}
+        className="block bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
+      >
+        <div className="flex flex-col sm:flex-row items-stretch">
         {/* Restaurant Image Carousel - Full Height */}
         <div className="w-full sm:w-64 h-48 sm:h-auto flex-shrink-0 relative">
           <div className="absolute inset-0 overflow-hidden">
@@ -194,7 +197,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
             </div>
           </div>
 
-          {/* Delivery Info */}
+          {/* Delivery Info + Book button */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-200 gap-3 sm:gap-0">
             <div className="flex items-center flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center">
@@ -210,10 +213,26 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
                 <span>${restaurant.deliveryFee.toFixed(2)} delivery</span>
               </div>
             </div>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowReservation(true);
+              }}
+              className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs sm:text-sm font-medium hover:bg-orange-700 transition-colors"
+            >
+              {lang === 'ar' ? 'حجز الآن' : 'Book now'}
+            </button>
           </div>
         </div>
       </div>
-    </Link>
+      </Link>
+      <ReservationDialog
+        restaurant={restaurant}
+        open={showReservation}
+        onClose={() => setShowReservation(false)}
+      />
+    </>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { restaurants } from "../data/restaurants";
 import { useLanguage } from "../context/LanguageContext";
+import ReservationDialog from "../components/ReservationDialog";
 
 type SampleReview = {
   id: string;
@@ -58,6 +59,7 @@ const RestaurantDetails: React.FC = () => {
   );
   const [reviewSearch, setReviewSearch] = useState("");
   const { lang } = useLanguage();
+  const [showReservation, setShowReservation] = useState(false);
 
   if (!restaurant) {
     return (
@@ -229,26 +231,38 @@ const RestaurantDetails: React.FC = () => {
               ))}
             </div>
           </div>
-          <Link
-            to="/"
-            className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors flex items-center"
-          >
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowReservation(true)}
+              className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs sm:text-sm font-medium hover:bg-orange-700 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            <span className="hidden sm:inline">Back to results</span>
-            <span className="sm:hidden">Back</span>
-          </Link>
+              {lang === "ar" ? "حجز طاولة" : "Book a table"}
+            </button>
+            <Link
+              to="/"
+              className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors flex items-center"
+            >
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              <span className="hidden sm:inline">
+                {lang === "ar" ? "العودة إلى النتائج" : "Back to results"}
+              </span>
+              <span className="sm:hidden">
+                {lang === "ar" ? "رجوع" : "Back"}
+              </span>
+            </Link>
+          </div>
         </div>
 
         {/* Hero Gallery */}
@@ -1113,6 +1127,11 @@ const RestaurantDetails: React.FC = () => {
           </div>
         </div>
       </div>
+      <ReservationDialog
+        restaurant={restaurant}
+        open={showReservation}
+        onClose={() => setShowReservation(false)}
+      />
     </div>
   );
 };

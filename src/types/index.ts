@@ -17,6 +17,9 @@ export interface Restaurant {
   cuisine: string;
   deliveryTime: string;
   deliveryFee: number;
+  specialDiscountHours?: string[]; // e.g. ['18:00', '19:00']
+  specialDiscountText?: string;
+  specialDiscountTextAr?: string;
   acceptsReservations?: boolean;
   accessible?: boolean;
   additionalAttributesCount?: number;
