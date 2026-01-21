@@ -39,20 +39,20 @@ export const restaurants: Restaurant[] = [
   },
   {
     id: '2',
-    name: 'Al Khawali',
-    nameAr: 'الخواجي',
-    location: 'Bab Touma, Old City, Damascus, Syria',
-    locationAr: 'باب توما، البلدة القديمة، دمشق، سوريا',
-    rating: 4.9,
+    name: 'Abu El Zulof Kahwa',
+    nameAr: 'أبو الزلف',
+    location: 'Bab Touma Street, Old City, Damascus, Syria',
+    locationAr: 'شارع باب توما، البلدة القديمة، دمشق، سوريا',
+    rating: 5,
     reviewCount: 1890,
     description:
-      'Al Khawali is known for its generous mezze, slow-cooked lamb dishes, and classic Syrian hospitality in a centuries-old Damascene house.',
+      'Abu El Zulof Kahwa is known for its generous mezze, slow-cooked lamb dishes, and classic Syrian hospitality in a centuries-old Damascene house.',
     descriptionAr:
-      'يشتهر مطعم الخواجي بمزاته الغنية وأطباق لحم الغنم المطهية ببطء والضيافة السورية الأصيلة في بيت دمشقي عريق.',
+      'يشتهر مطعم أبو الزلف بمزاته الغنية وأطباق لحم الغنم المطهية ببطء والضيافة السورية الأصيلة في بيت دمشقي عريق.',
     image:
-      'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&h=600&fit=crop',
+      'https://cdn-ilafhih.nitrocdn.com/lXsmEavFfjckDgqxPkBdRnRPDWDVyivI/assets/images/optimized/rev-dd9ce6b/abuelzulof-kahwa.com/wp-content/uploads/2023/07/Abu-El-Zulof-Kahwa-logo-En-RGB-1-1.png',
     images: [
-      'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&h=600&fit=crop',
+      'https://cdn-ilafhih.nitrocdn.com/lXsmEavFfjckDgqxPkBdRnRPDWDVyivI/assets/images/optimized/rev-dd9ce6b/abuelzulof-kahwa.com/wp-content/uploads/2023/07/Abu-El-Zulof-Kahwa-logo-En-RGB-1-1.png',
       'https://images.unsplash.com/photo-1573622292439-81ada9d9c55c?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1574920174658-7a18a6916f77?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=800&h=600&fit=crop',

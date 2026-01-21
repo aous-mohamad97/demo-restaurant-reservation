@@ -76,7 +76,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({ restaurant }) => {
       >
         <div className="flex flex-col sm:flex-row items-stretch">
         {/* Restaurant Image Carousel - Full Height */}
-        <div className="w-full sm:w-64 h-48 sm:h-auto flex-shrink-0 relative">
+        <div className="w-full sm:w-64 h-64 sm:h-auto flex-shrink-0 relative">
           <div className="absolute inset-0 overflow-hidden">
             {/* Image Container */}
             <div 

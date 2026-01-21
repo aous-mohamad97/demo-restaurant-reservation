@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, location, onSearchChange, 
         <div className="flex lg:hidden justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-xl font-bold text-orange-600">🍽️</span>
-            <span className="text-lg font-bold text-gray-800 hidden sm:inline">7 Jaztelak</span>
+            <span className="text-lg font-bold text-gray-800">7 Jaztelak</span>
           </Link>
           <div className="flex items-center space-x-2">
             {/* Language picker */}
@@ -66,13 +66,13 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, location, onSearchChange, 
               onClick={() => navigate('/login')}
               className="px-3 py-1.5 text-sm text-gray-700 hover:text-orange-600 font-medium transition-colors"
             >
-              Login
+              {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
             </button>
             <button
               onClick={() => navigate('/register')}
               className="px-3 py-1.5 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium transition-colors"
             >
-              Register
+              {lang === 'ar' ? 'إنشاء حساب' : 'Register'}
             </button>
           </div>
         </div>
