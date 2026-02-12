@@ -15,3 +15,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Custom styling for deal markers on the map */
+.deal-marker-icon {
+  filter: hue-rotate(155deg);
+}

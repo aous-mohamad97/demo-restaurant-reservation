@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Restaurant } from "../types";
+import { Restaurant, ReservationActivity } from "../types";
 import { useLanguage } from "../context/LanguageContext";
+import { useTranslations } from "../i18n";
+import { getRestaurantName } from "../utils/restaurant";
 
 interface ReservationDialogProps {
   restaurant: Restaurant;
@@ -14,6 +16,7 @@ export const ReservationDialog = ({
   onClose,
 }: ReservationDialogProps) => {
   const { lang } = useLanguage();
+  const { t } = useTranslations();
   const [persons, setPersons] = useState<number>(2);
   const [time, setTime] = useState<string>("19:00");
   const [submitted, setSubmitted] = useState(false);
@@ -34,17 +37,30 @@ export const ReservationDialog = ({
         ? restaurant.specialDiscountTextAr ?? restaurant.specialDiscountText
         : restaurant.specialDiscountText
       : hasFallbackDiscount
-      ? lang === "ar"
-        ? "خصم خاص على العشاء في هذه الساعة."
-        : "Special dinner discount at this hour."
-      : lang === "ar"
-      ? "لا يوجد عرض خاص في هذه الساعة."
-      : "No special discount at this hour.";
+      ? t("reservation.specialDiscount")
+      : t("reservation.noDiscount");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    // In a real app, call API here. For now it's client-side only.
+
+    // In a real app, call API here. For now it's client-side only and we log to localStorage.
+    try {
+      const existingRaw = localStorage.getItem("reservationActivities");
+      const existing: ReservationActivity[] = existingRaw ? JSON.parse(existingRaw) : [];
+      const activity: ReservationActivity = {
+        id: `${Date.now()}-${restaurant.id}`,
+        restaurantId: restaurant.id,
+        restaurantName: getRestaurantName(restaurant, lang),
+        persons,
+        time,
+        createdAt: new Date().toISOString(),
+      };
+      const next = [activity, ...existing];
+      localStorage.setItem("reservationActivities", JSON.stringify(next));
+    } catch {
+      // Ignore storage errors in demo
+    }
   };
 
   const closeAndReset = () => {
@@ -52,26 +68,16 @@ export const ReservationDialog = ({
     onClose();
   };
 
-  const title =
-    lang === "ar"
-      ? "حجز طاولة"
-      : "Reserve a table";
-
-  const confirmLabel = lang === "ar" ? "تأكيد الحجز" : "Confirm reservation";
-  const cancelLabel = lang === "ar" ? "إلغاء" : "Cancel";
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 space-y-4">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-              {title}
+              {t("reservation.title")}
             </h2>
             <p className="text-xs sm:text-sm text-gray-600 mt-1">
-              {lang === "ar"
-                ? `المطعم: ${restaurant.nameAr ?? restaurant.name}`
-                : `Restaurant: ${restaurant.name}`}
+              {t("reservation.restaurantLabel")}: {getRestaurantName(restaurant, lang)}
             </p>
           </div>
           <button
@@ -87,7 +93,7 @@ export const ReservationDialog = ({
           <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <div className="flex-1">
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                {lang === "ar" ? "عدد الأشخاص" : "Number of persons"}
+                {t("reservation.numberOfPersons")}
               </label>
               <input
                 type="number"
@@ -100,7 +106,7 @@ export const ReservationDialog = ({
             </div>
             <div className="flex-1">
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                {lang === "ar" ? "الساعة" : "Time"}
+                {t("reservation.time")}
               </label>
               <input
                 type="time"
@@ -117,9 +123,7 @@ export const ReservationDialog = ({
 
           {submitted && (
             <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs sm:text-sm text-green-800">
-              {lang === "ar"
-                ? "تم إرسال طلب الحجز بنجاح (تجريبي فقط على الواجهة)."
-                : "Reservation request submitted successfully (client-side demo only)."}
+              {t("reservation.success")}
             </div>
           )}
 
@@ -129,13 +133,13 @@ export const ReservationDialog = ({
               onClick={closeAndReset}
               className="px-4 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              {cancelLabel}
+              {t("reservation.cancel")}
             </button>
             <button
               type="submit"
               className="px-4 py-2 text-xs sm:text-sm rounded-lg bg-orange-600 text-white hover:bg-orange-700 font-medium"
             >
-              {confirmLabel}
+              {t("reservation.confirm")}
             </button>
           </div>
         </form>

@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
-import { FilterState } from '../types';
-import { categories, cuisines } from '../data/restaurants';
-import { useLanguage } from '../context/LanguageContext';
+import { FilterState, FilterStateArrayKey } from '../types';
+import { categories } from '../data';
+import {
+  DEFAULT_FILTER_STATE,
+  PRICE_OPTIONS,
+  SORT_OPTIONS,
+  SUGGESTED_OPTIONS,
+  FEATURES_OPTIONS,
+  DIETARY_OPTIONS,
+  DISTANCE_OPTIONS,
+  RATING_OPTIONS,
+} from '../constants';
+import { useTranslations } from '../i18n';
 
 interface FilterSidebarProps {
   filters: FilterState;
@@ -9,16 +19,16 @@ interface FilterSidebarProps {
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }) => {
-  const { lang } = useLanguage();
+  const { t } = useTranslations();
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
     sort: true,
+    deals: true,
     price: true,
     rating: true,
     suggested: true,
     features: true,
     dietary: true,
     category: true,
-    cuisine: true,
     distance: true,
   });
 
@@ -29,64 +39,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
     }));
   };
 
-  const handlePriceRangeToggle = (price: string) => {
-    const newPriceRange = filters.priceRange.includes(price)
-      ? filters.priceRange.filter((p) => p !== price)
-      : [...filters.priceRange, price];
-    onFilterChange({
-      ...filters,
-      priceRange: newPriceRange,
-    });
-  };
-
-  const handleSuggestedToggle = (suggested: string) => {
-    const newSuggested = filters.suggested.includes(suggested)
-      ? filters.suggested.filter((s) => s !== suggested)
-      : [...filters.suggested, suggested];
-    onFilterChange({
-      ...filters,
-      suggested: newSuggested,
-    });
-  };
-
-  const handleFeaturesToggle = (feature: string) => {
-    const newFeatures = filters.features.includes(feature)
-      ? filters.features.filter((f) => f !== feature)
-      : [...filters.features, feature];
-    onFilterChange({
-      ...filters,
-      features: newFeatures,
-    });
-  };
-
-  const handleDietaryToggle = (dietary: string) => {
-    const newDietary = filters.dietaryRestrictions.includes(dietary)
-      ? filters.dietaryRestrictions.filter((d) => d !== dietary)
-      : [...filters.dietaryRestrictions, dietary];
-    onFilterChange({
-      ...filters,
-      dietaryRestrictions: newDietary,
-    });
-  };
-
-  const handleCuisineToggle = (cuisine: string) => {
-    const newCuisines = filters.cuisine.includes(cuisine)
-      ? filters.cuisine.filter((c) => c !== cuisine)
-      : [...filters.cuisine, cuisine];
-    onFilterChange({
-      ...filters,
-      cuisine: newCuisines,
-    });
-  };
-
-  const handleCategoryToggle = (category: string) => {
-    const newCategories = filters.categories.includes(category)
-      ? filters.categories.filter((c) => c !== category)
-      : [...filters.categories, category];
-    onFilterChange({
-      ...filters,
-      categories: newCategories,
-    });
+  const updateArrayFilter = (field: FilterStateArrayKey, value: string) => {
+    const current = filters[field] as string[];
+    const next = current.includes(value)
+      ? current.filter((x) => x !== value)
+      : [...current, value];
+    onFilterChange({ ...filters, [field]: next });
   };
 
   const handleRatingChange = (rating: number) => {
@@ -112,25 +70,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
 
   const clearAllFilters = () => {
     onFilterChange({
+      ...DEFAULT_FILTER_STATE,
       searchQuery: filters.searchQuery,
       location: filters.location,
-      minRating: 0,
-      priceRange: [],
-      categories: [],
-      cuisine: [],
-      sortBy: 'rating',
-      features: [],
-      distance: '',
-      suggested: [],
-      dietaryRestrictions: [],
     });
   };
 
   const hasActiveFilters =
+    filters.dealsOnly ||
     filters.minRating > 0 ||
     filters.priceRange.length > 0 ||
     filters.categories.length > 0 ||
-    filters.cuisine.length > 0 ||
     filters.features.length > 0 ||
     filters.distance !== '' ||
     filters.suggested.length > 0 ||
@@ -146,15 +96,46 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
       <div className="p-3 sm:p-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">
-            {lang === 'ar' ? 'عوامل التصفية' : 'Filters'}
+            {t('filters.title')}
           </h2>
           {hasActiveFilters && (
             <button
               onClick={clearAllFilters}
               className="text-sm text-orange-600 hover:text-orange-700 font-medium"
             >
-              Clear all
+              {t('filters.clearAll')}
             </button>
+          )}
+        </div>
+
+        {/* Deals */}
+        <div className="mb-6 border-b border-gray-200 pb-4">
+          <button
+            onClick={() => toggleSection('deals')}
+            className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
+          >
+            <span>{t('filters.deals')}</span>
+            <svg
+              className={`h-4 w-4 transition-transform ${expandedSections.deals ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {expandedSections.deals && (
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.dealsOnly}
+                onChange={() =>
+                  onFilterChange({ ...filters, dealsOnly: !filters.dealsOnly })
+                }
+                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-700">{t('filters.dealsOnly')}</span>
+            </label>
           )}
         </div>
 
@@ -164,7 +145,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('sort')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>{lang === 'ar' ? 'ترتيب حسب' : 'Sort By'}</span>
+            <span>{t('filters.sortBy')}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.sort ? 'rotate-180' : ''}`}
               fill="none"
@@ -176,12 +157,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           </button>
           {expandedSections.sort && (
             <div className="space-y-2">
-              {[
-                { value: 'rating', label: lang === 'ar' ? 'أعلى تقييم' : 'Highest Rated' },
-                { value: 'reviews', label: lang === 'ar' ? 'أكثر المراجعات' : 'Most Reviews' },
-                { value: 'name', label: lang === 'ar' ? 'الاسم (أ-ي)' : 'Name (A-Z)' },
-                { value: 'deliveryTime', label: lang === 'ar' ? 'أسرع توصيل' : 'Fastest Delivery' },
-              ].map((option) => (
+              {SORT_OPTIONS.map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
                     type="radio"
@@ -191,7 +167,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
                     onChange={() => handleSortChange(option.value as FilterState['sortBy'])}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
                   />
-                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                  <span className="ml-2 text-sm text-gray-700">{t(option.key)}</span>
                 </label>
               ))}
             </div>
@@ -201,14 +177,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
         {/* Price Range - Segmented Buttons */}
         <div className="mb-6 border-b border-gray-200 pb-4">
           <h3 className="text-sm font-semibold text-gray-900 mb-3">
-            {lang === 'ar' ? 'السعر' : 'Price'}
+            {t('filters.price')}
           </h3>
           {expandedSections.price && (
             <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
-              {['$', '$$', '$$$', '$$$$'].map((price, index) => (
+              {PRICE_OPTIONS.map((price, index) => (
                 <button
                   key={price}
-                  onClick={() => handlePriceRangeToggle(price)}
+                  onClick={() => updateArrayFilter('priceRange', price)}
                   className={`px-4 py-2 text-sm font-medium transition-all ${
                     filters.priceRange.includes(price)
                       ? 'bg-orange-600 text-white border-orange-600'
@@ -228,7 +204,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('suggested')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>{lang === 'ar' ? 'مقترَح' : 'Suggested'}</span>
+            <span>{t('filters.suggested')}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.suggested ? 'rotate-180' : ''}`}
               fill="none"
@@ -240,40 +216,19 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           </button>
           {expandedSections.suggested && (
             <div className="space-y-2">
-              {[
-                {
-                  value: 'openNow',
-                  label:
-                    lang === 'ar'
-                      ? `مفتوح الآن ${getCurrentTime()}`
-                      : `Open now ${getCurrentTime()}`,
-                },
-                {
-                  value: 'offersDelivery',
-                  label: lang === 'ar' ? 'يوفر خدمة التوصيل' : 'Offers delivery',
-                },
-                {
-                  value: 'takeawayAvailable',
-                  label: lang === 'ar' ? 'متاح سفري' : 'Takeaway available',
-                },
-                {
-                  value: 'suitableForDinner',
-                  label: lang === 'ar' ? 'مناسب للعشاء' : 'Suitable for dinner',
-                },
-                {
-                  value: 'newAndTrendy',
-                  label: lang === 'ar' ? 'جديد وعصري' : 'New and trendy',
-                },
-                { value: 'terrace', label: lang === 'ar' ? 'تراس' : 'Terrace' },
-              ].map((option) => (
+              {SUGGESTED_OPTIONS.map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.suggested.includes(option.value)}
-                    onChange={() => handleSuggestedToggle(option.value)}
+                    onChange={() => updateArrayFilter('suggested', option.value)}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                  <span className="ml-2 text-sm text-gray-700">
+                    {option.value === 'openNow'
+                      ? `${t(option.key)} ${getCurrentTime()}`
+                      : t(option.key)}
+                  </span>
                 </label>
               ))}
             </div>
@@ -286,7 +241,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('features')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>{lang === 'ar' ? 'المميزات' : 'Features'}</span>
+            <span>{t('filters.features')}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.features ? 'rotate-180' : ''}`}
               fill="none"
@@ -298,44 +253,19 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           </button>
           {expandedSections.features && (
             <div className="space-y-2">
-              {[
-                {
-                  value: 'suitableForLunch',
-                  label: lang === 'ar' ? 'مناسب للغداء' : 'Suitable for lunch',
-                },
-                {
-                  value: 'suitableForChildren',
-                  label: lang === 'ar' ? 'مناسب للأطفال' : 'Suitable for children',
-                },
-                {
-                  value: 'suitableForGroups',
-                  label: lang === 'ar' ? 'مناسب للمجموعات' : 'Suitable for groups',
-                },
-                {
-                  value: 'dogsAllowed',
-                  label: lang === 'ar' ? 'يسمح بدخول الكلاب' : 'Dogs allowed',
-                },
-                {
-                  value: 'fullBar',
-                  label: lang === 'ar' ? 'بار كامل' : 'Full bar',
-                },
-                {
-                  value: 'suitableForBrunch',
-                  label: lang === 'ar' ? 'مناسب للبرانش' : 'Suitable for brunch',
-                },
-              ].map((option) => (
+              {FEATURES_OPTIONS.map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={filters.features.includes(option.value)}
-                    onChange={() => handleFeaturesToggle(option.value)}
+                    onChange={() => updateArrayFilter('features', option.value)}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                  <span className="ml-2 text-sm text-gray-700">{t(option.key)}</span>
                 </label>
               ))}
               <button className="text-sm text-blue-600 hover:text-blue-700 mt-2">
-                {lang === 'ar' ? 'عرض الكل' : 'View all'}
+                {t('filters.viewAll')}
               </button>
             </div>
           )}
@@ -344,29 +274,21 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
         {/* Dietary Restrictions - Pill Buttons */}
         <div className="mb-6 border-b border-gray-200 pb-4">
           <h3 className="text-sm font-semibold text-gray-900 mb-3">
-            {lang === 'ar' ? 'القيود الغذائية' : 'Dietary Restrictions'}
+            {t('filters.dietary')}
           </h3>
           {expandedSections.dietary && (
             <div className="flex flex-wrap gap-2">
-              {[
-                { value: 'halal', label: lang === 'ar' ? 'حلال' : 'Halal' },
-                { value: 'vegan', label: lang === 'ar' ? 'نباتي' : 'Vegan' },
-                {
-                  value: 'vegetarian',
-                  label: lang === 'ar' ? 'نباتي (ألبان)' : 'Vegetarian',
-                },
-                { value: 'kosher', label: lang === 'ar' ? 'كوشير' : 'Kosher' },
-              ].map((option) => (
+              {DIETARY_OPTIONS.map((option) => (
                 <button
                   key={option.value}
-                  onClick={() => handleDietaryToggle(option.value)}
+                  onClick={() => updateArrayFilter('dietaryRestrictions', option.value)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-all ${
                     filters.dietaryRestrictions.includes(option.value)
                       ? 'bg-orange-600 text-white border-orange-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:border-orange-300'
                   }`}
                 >
-                  {option.label}
+                  {t(option.key)}
                 </button>
               ))}
             </div>
@@ -379,7 +301,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('distance')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>{lang === 'ar' ? 'المسافة' : 'Distance'}</span>
+            <span>{t('filters.distance')}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.distance ? 'rotate-180' : ''}`}
               fill="none"
@@ -391,28 +313,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           </button>
           {expandedSections.distance && (
             <div className="space-y-2">
-              {[
-                {
-                  value: 'asTheCrowFlies',
-                  label: lang === 'ar' ? 'خط مستقيم' : 'As the crow flies',
-                },
-                {
-                  value: 'byCar',
-                  label: lang === 'ar' ? 'بالسيارة (٨ كم)' : 'By car (8 km)',
-                },
-                {
-                  value: 'byBike',
-                  label: lang === 'ar' ? 'بالدراجة (٤ كم)' : 'By bike (4 km)',
-                },
-                {
-                  value: 'onFoot',
-                  label: lang === 'ar' ? 'مشياً (٢ كم)' : 'On foot (2 km)',
-                },
-                {
-                  value: 'within500m',
-                  label: lang === 'ar' ? 'ضمن ٥٠٠ متر' : 'Within 500 m',
-                },
-              ].map((option) => (
+              {DISTANCE_OPTIONS.map((option) => (
                 <label key={option.value} className="flex items-center cursor-pointer">
                   <input
                     type="radio"
@@ -421,7 +322,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
                     onChange={() => handleDistanceChange(option.value)}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
                   />
-                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                  <span className="ml-2 text-sm text-gray-700">{t(option.key)}</span>
                 </label>
               ))}
             </div>
@@ -434,7 +335,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('rating')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>{lang === 'ar' ? 'أدنى تقييم' : 'Minimum Rating'}</span>
+            <span>{t('filters.minRating')}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.rating ? 'rotate-180' : ''}`}
               fill="none"
@@ -446,7 +347,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
           </button>
           {expandedSections.rating && (
             <div className="space-y-2">
-              {[4.5, 4.0, 3.5, 3.0, 0].map((rating) => (
+              {RATING_OPTIONS.map((rating) => (
                 <label key={rating} className="flex items-center cursor-pointer">
                   <input
                     type="radio"
@@ -460,50 +361,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
                       <>
                         {rating}+ ⭐
                         <span className="ml-1 text-gray-500">
-                          {lang === 'ar'
-                            ? `(${rating} نجوم فأكثر)`
-                            : `(${rating} stars & up)`}
+                          ({rating} {t('filters.starsAndUp')})
                         </span>
                       </>
-                    ) : lang === 'ar' ? (
-                      'أي تقييم'
                     ) : (
-                      'Any Rating'
+                      t('filters.anyRating')
                     )}
                   </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Cuisine Type */}
-        <div className="mb-6 border-b border-gray-200 pb-4">
-          <button
-            onClick={() => toggleSection('cuisine')}
-            className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
-          >
-            <span>{lang === 'ar' ? 'نوع المطبخ' : 'Cuisine Type'}</span>
-            <svg
-              className={`h-4 w-4 transition-transform ${expandedSections.cuisine ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {expandedSections.cuisine && (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {cuisines.map((cuisine) => (
-                <label key={cuisine} className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.cuisine.includes(cuisine)}
-                    onChange={() => handleCuisineToggle(cuisine)}
-                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">{cuisine}</span>
                 </label>
               ))}
             </div>
@@ -516,7 +380,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
             onClick={() => toggleSection('category')}
             className="w-full flex items-center justify-between text-sm font-semibold text-gray-900 mb-3"
           >
-            <span>{lang === 'ar' ? 'التصنيف' : 'Category'}</span>
+            <span>{t('filters.category')}</span>
             <svg
               className={`h-4 w-4 transition-transform ${expandedSections.category ? 'rotate-180' : ''}`}
               fill="none"
@@ -532,7 +396,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
                 {categories.slice(0, 6).map((category) => (
                   <button
                     key={category}
-                    onClick={() => handleCategoryToggle(category)}
+                    onClick={() => updateArrayFilter('categories', category)}
                     className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-all ${
                       filters.categories.includes(category)
                         ? 'bg-orange-600 text-white border-orange-600'
@@ -545,7 +409,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange }
               </div>
               {categories.length > 6 && (
                 <button className="text-sm text-blue-600 hover:text-blue-700 mt-2">
-                  View all
+                  {t('filters.viewAll')}
                 </button>
               )}
             </div>
